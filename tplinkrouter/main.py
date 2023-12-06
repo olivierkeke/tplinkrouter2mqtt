@@ -17,7 +17,7 @@ async def launch():
     parser.add_argument('--tplink_password', default=os.environ.get("TPLINK_PASSWORD"))
     parser.add_argument('--tplink_host', default=os.environ.get("TPLINK_HOST"))
     parser.add_argument('--tplink_port', default=os.environ.get("TPLINK_PORT"))
-    parser.add_argument('--broker-url', default=os.environ.get("BROKER_URL"))
+    parser.add_argument('--broker_url', default=os.environ.get("BROKER_URL"))
 
     args = parser.parse_args()
     telnet_communicator = TelnetCommunicator(
