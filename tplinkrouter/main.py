@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 from argparse import ArgumentParser
 
@@ -6,6 +7,9 @@ import aiomqtt
 
 from tplinkrouter.mqtt import MQTTCommunicator
 from tplinkrouter.telnet import TelnetCommunicator
+
+logging.basicConfig()
+logging.getLogger().setLevel(logging.DEBUG)
 
 
 async def launch():
@@ -20,6 +24,7 @@ async def launch():
     parser.add_argument('--broker_url', default=os.environ.get("BROKER_URL"))
 
     args = parser.parse_args()
+    logging.info(f'Connecting to mqtt broker {args.broker_url}')
     telnet_communicator = TelnetCommunicator(
         username=args.tplink_username,
         password=args.tplink_password,
