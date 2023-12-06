@@ -13,10 +13,10 @@ async def launch():
         prog='tplinkrouter2mqtt',
         description='Gateway between tplinkrouter (telnet) and mqtt'
     )
-    parser.add_argument('--tplink-username', default=os.environ.get("TPLINK_USERNAME"))
-    parser.add_argument('--tplink-password', default=os.environ.get("TPLINK_PASSWORD"))
-    parser.add_argument('--tplink-host', default=os.environ.get("TPLINK_HOST"))
-    parser.add_argument('--tplink-port', default=os.environ.get("TPLINK_PORT"))
+    parser.add_argument('--tplink_username', default=os.environ.get("TPLINK_USERNAME"))
+    parser.add_argument('--tplink_password', default=os.environ.get("TPLINK_PASSWORD"))
+    parser.add_argument('--tplink_host', default=os.environ.get("TPLINK_HOST"))
+    parser.add_argument('--tplink_port', default=os.environ.get("TPLINK_PORT"))
     parser.add_argument('--broker-url', default=os.environ.get("BROKER_URL"))
 
     args = parser.parse_args()
