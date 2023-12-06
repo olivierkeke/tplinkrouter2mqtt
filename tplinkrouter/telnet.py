@@ -51,7 +51,7 @@ class TelnetCommunicator:
                 frame = frame_to_dict(outp)
                 if frame:
                     wifi_data = WifiData(**frame)
-                    print(json.dumps(frame))
+                    logging.debug(f"wifi_frame: {json.dumps(frame)}")
                     try:
                         self.state_message_queue.put_nowait(wifi_data)
                     except QueueFull:
@@ -63,10 +63,10 @@ class TelnetCommunicator:
                 timer.start()
 
             # display all server output
-            print(outp, flush=True)
+            #print(outp, flush=True)
 
         # EOF
-        print()
+        #print()
 
     async def listen_command(self, writer: TelnetWriter):
         if self.command_messsage_queue is not None:

@@ -31,11 +31,12 @@ async def launch():
             state_message_queue=telnet_communicator.state_message_queue,
             command_messsage_queue=telnet_communicator.command_messsage_queue
         )
-    await asyncio.gather(
-        telnet_communicator.run(),
-        mqtt_communicator.publish_state(),
-        mqtt_communicator.listen_to_command(),
-        )
+        await mqtt_communicator.hass_discovery()
+        await asyncio.gather(
+            telnet_communicator.run(),
+            mqtt_communicator.publish_state(),
+            mqtt_communicator.listen_to_command(),
+            )
 
 
 if __name__ == '__main__':
