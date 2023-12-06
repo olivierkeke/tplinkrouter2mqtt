@@ -50,10 +50,10 @@ class TelnetCommunicator:
             else:
                 frame = frame_to_dict(outp)
                 if frame:
-                    wifi_data = WifiData(**frame)
+                    #wifi_data = WifiData(**frame)
                     logging.debug(f"wifi_frame: {json.dumps(frame)}")
                     try:
-                        self.state_message_queue.put_nowait(wifi_data)
+                        self.state_message_queue.put_nowait(frame)
                     except QueueFull:
                         logging.warning('State message queue is full')
             if 'TP-LINK(conf)#' in outp:
@@ -63,7 +63,7 @@ class TelnetCommunicator:
                 timer.start()
 
             # display all server output
-            #print(outp, flush=True)
+            logging.debug(f"receive message: {outp}")
 
         # EOF
         #print()
