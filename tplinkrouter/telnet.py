@@ -68,6 +68,7 @@ class TelnetCommunicator:
         if self.command_messsage_queue is not None:
             while True:
                 cmd = await self.command_messsage_queue.get()
+                logging.debug(f"writing command: {cmd}")
                 writer.write(f'{cmd}\n')
 
     async def run(self):
