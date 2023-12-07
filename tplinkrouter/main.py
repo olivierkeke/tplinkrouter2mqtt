@@ -22,7 +22,7 @@ async def launch():
     parser.add_argument('--tplink_host', default=os.environ.get("TPLINK_HOST"))
     parser.add_argument('--tplink_port', default=os.environ.get("TPLINK_PORT"))
     parser.add_argument('--mqtt_host', default=os.environ.get("MQTT_HOST"))
-    parser.add_argument('--mqtt_port', default=os.environ.get("MQTT_PORT"))
+    parser.add_argument('--mqtt_port', type=int, default=os.environ.get("MQTT_PORT"))
     parser.add_argument('--mqtt_username', default=os.environ.get("MQTT_USERNAME"))
     parser.add_argument('--mqtt_password', default=os.environ.get("MQTT_PASSWORD"))
 
