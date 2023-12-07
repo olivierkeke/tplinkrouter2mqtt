@@ -31,7 +31,7 @@ class MQTTCommunicator:
             async for message in messages:
                 logging.debug(f'received command with payload: {message.payload}')
                 try:
-                    self.command_messsage_queue.put_nowait(message.payload)
+                    self.command_messsage_queue.put_nowait(message.payload.decode('UTF-8'))
                 except QueueFull:
                     logging.warning('Command message queue is full')
 
