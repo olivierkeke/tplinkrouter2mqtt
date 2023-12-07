@@ -27,7 +27,7 @@ async def launch():
     parser.add_argument('--mqtt_password', default=os.environ.get("MQTT_PASSWORD"))
 
     args = parser.parse_args()
-    logging.info(f'Connecting to mqtt broker {args.broker_url}')
+    logging.info(f'Connecting to mqtt broker {args.mqtt_host}')
     telnet_communicator = TelnetCommunicator(
         username=args.tplink_username,
         password=args.tplink_password,
