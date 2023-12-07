@@ -42,11 +42,14 @@ class TelnetCommunicator:
             else:
                 frame = frame_to_dict(outp)
                 if frame:
-                    logging.debug(f"wifi_frame: {json.dumps(frame)}")
                     try:
-                        self.state_message_queue.put_nowait(frame)
-                    except QueueFull:
-                        logging.warning('State message queue is full')
+                        logging.debug(f"wifi_frame: {json.dumps(frame)}")
+                        try:
+                            self.state_message_queue.put_nowait(frame)
+                        except QueueFull:
+                            logging.warning('State message queue is full')
+                    except TypeError:
+                        logging.debug(f"malformed frame: {frame}")
                 else:
                     logging.debug(f"receive unknown message: {outp}")
             if 'TP-LINK(conf)#' in outp:
