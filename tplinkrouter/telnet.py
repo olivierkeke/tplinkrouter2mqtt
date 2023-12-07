@@ -10,15 +10,7 @@ from threading import Timer
 
 from telnetlib3 import TelnetReader, TelnetWriter
 
-from .datamodel import frame_to_dict, WifiData
-
-REFRESH_CMD = "wlctl show"
-WIFI_ON_CMD = "wlctl set --switch on"
-WIFI_OFF_CMD = "wlctl set --switch off"
-QSS_ON_CMD = "wlctl set --qss on"
-QSS_OFF_CMD = "wlctl set --qss off"
-
-event_queue = asyncio.Queue()
+from .tplink_config import REFRESH_CMD, frame_to_dict
 
 
 @dataclass
@@ -50,12 +42,13 @@ class TelnetCommunicator:
             else:
                 frame = frame_to_dict(outp)
                 if frame:
-                    #wifi_data = WifiData(**frame)
                     logging.debug(f"wifi_frame: {json.dumps(frame)}")
                     try:
                         self.state_message_queue.put_nowait(frame)
                     except QueueFull:
                         logging.warning('State message queue is full')
+                else:
+                    logging.debug(f"receive unknown message: {outp}")
             if 'TP-LINK(conf)#' in outp:
                 def func():
                     writer.write(f'{REFRESH_CMD}\n')
@@ -63,7 +56,7 @@ class TelnetCommunicator:
                 timer.start()
 
             # display all server output
-            logging.debug(f"receive message: {outp}")
+            #logging.debug(f"receive message: {outp}")
 
         # EOF
         #print()

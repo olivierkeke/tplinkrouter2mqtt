@@ -7,6 +7,8 @@ from typing import Dict
 
 import aiomqtt
 
+from tplinkrouter.tplink_config import WIFI_ON_CMD, WIFI_OFF_CMD
+
 
 @dataclass
 class MQTTCommunicator:
@@ -27,6 +29,7 @@ class MQTTCommunicator:
         async with self.client.messages() as messages:
             await self.client.subscribe("tplinkrouter/wifi/set")
             async for message in messages:
+                logging.debug(f'received command with payload: {message.payload}')
                 try:
                     self.state_message_queue.put_nowait(message.payload)
                 except QueueFull:
@@ -39,8 +42,10 @@ class MQTTCommunicator:
             "command_topic": "tplinkrouter/wifi/set",
             "unique_id": "wifi_switch",
             "value_template": "{{ value_json.Status }}",
-            "payload_on": "Up",
-            "payload_off": "Disabled",
+            "state_on": "Up",
+            "state_off": "Disabled",
+            "payload_on": WIFI_ON_CMD,
+            "payload_off": WIFI_OFF_CMD,
             "icon": "mdi:wifi",
             "device": {
                 "identifiers": [
