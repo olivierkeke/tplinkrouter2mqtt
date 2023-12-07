@@ -68,8 +68,8 @@ class TelnetCommunicator:
         if self.command_messsage_queue is not None:
             while True:
                 cmd = await self.command_messsage_queue.get()
-                logging.debug(f"writing command: {cmd}")
-                writer.write(f'{cmd}\n')
+                logging.debug(f"writing command: {cmd.decode()}")
+                writer.write(f'{cmd.decode()}\n')
 
     async def run(self):
         reader, writer = await telnetlib3.open_connection(self.host, 23, shell=self.shell)
