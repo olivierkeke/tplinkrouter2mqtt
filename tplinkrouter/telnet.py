@@ -27,6 +27,7 @@ class TelnetCommunicator:
     serial: Optional[str] = None
     listen_task: Optional[Task] = None
     update_task: Optional[Task] = None
+    lock = asyncio.Lock()
 
     async def listen_command(self):
         if self.command_messsage_queue is not None:
@@ -35,33 +36,41 @@ class TelnetCommunicator:
                 logging.debug(f"writing command: {cmd.decode()}")
                 self.writer.write(f'{cmd.decode()}\n')
 
+    async def execute_command(self, cmd: str) -> str:
+        await self.lock.acquire()
+        self.writer.write(f'{cmd}\n')
+        while True:
+            outp = await self.reader.read(1024)
+            if 'cmd:SUCC' in outp:
+                self.lock.release()
+                return outp
+            else:
+                logging.debug(f'receive unknown msg: {outp}')
+
     async def update(self):
         while True:
+            outp = await self.execute_command(REFRESH_CMD)
             self.writer.write(f'{REFRESH_CMD}\n')
-            while True:
-                outp = await self.reader.read(1024)
-                frame = frame_to_dict(outp)
-                if frame:
+            frame = frame_to_dict(outp)
+            if frame:
+                try:
+                    logging.debug(f"wifi_frame: {json.dumps(frame)}")
                     try:
-                        logging.debug(f"wifi_frame: {json.dumps(frame)}")
-                        try:
-                            self.state_message_queue.put_nowait(frame)
-                        except QueueFull:
-                            logging.warning('State message queue is full')
-                    except TypeError:
-                        logging.debug(f"malformed frame: {frame}")
-                    break
-                else:
-                    logging.debug(f"receive unknown message: {outp}")
+                        self.state_message_queue.put_nowait(frame)
+                    except QueueFull:
+                        logging.warning('State message queue is full')
+                except TypeError:
+                    logging.debug(f"malformed frame: {frame}")
+                break
+            else:
+                logging.debug(f"receive unknown message: {outp}")
             await asyncio.sleep(10)
 
     async def get_serial(self) -> str:
-        self.writer.write(f'{GET_SERIAL_CMD}\n')
-        while True:
-            outp = await self.reader.read(1024)
-            if 'serialNumber' in outp:
-                result = serial_pattern.search(outp)
-                return result.group(1)
+        outp = await self.execute_command(GET_SERIAL_CMD)
+        logging.debug(f"received message: {outp}")
+        result = serial_pattern.search(outp)
+        return result.group(1)
 
     async def authenticate(self):
         while True:
