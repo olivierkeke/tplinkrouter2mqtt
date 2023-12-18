@@ -32,7 +32,7 @@ class MQTTCommunicator:
             await self.client.subscribe("homeassistant/status")
             async for message in messages:
                 message: Message
-                logging.debug(f'received message with payload: {message.payload}')
+                logging.debug(f'received message with payload: {message.payload} on topic {message.topic}')
                 if message.topic == "tplinkrouter/wifi/set":
                     try:
                         self.telnet_communicator.command_messsage_queue.put_nowait(message.payload)
@@ -85,5 +85,5 @@ class MQTTCommunicator:
             f"{self.discovery_prefix}/switch/{device['model']}_qss/config",
             payload=json.dumps(hass_discovery_qss)
         )
-        logging.info(f"hass discovery config sent: {hass_discovery_switch}")
+        logging.info(f"hass discovery config sent")
 
