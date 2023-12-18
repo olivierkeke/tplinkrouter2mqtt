@@ -33,12 +33,12 @@ class MQTTCommunicator:
             async for message in messages:
                 message: Message
                 logging.debug(f'received message with payload: {message.payload} on topic {message.topic}')
-                if message.topic == "tplinkrouter/wifi/set":
+                if message.topic.matches("tplinkrouter/wifi/set"):
                     try:
                         self.telnet_communicator.command_messsage_queue.put_nowait(message.payload)
                     except QueueFull:
                         logging.warning('Command message queue is full')
-                elif message.topic == "homeassistant/status":
+                elif message.topic.matches("homeassistant/status"):
                     logging.debug(f"received hass status {message.payload}")
                     if message.payload == b'online':
                         await self.send_hass_discovery()
