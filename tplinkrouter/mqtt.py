@@ -39,7 +39,8 @@ class MQTTCommunicator:
                     except QueueFull:
                         logging.warning('Command message queue is full')
                 elif message.topic == "homeassistant/status":
-                    if message.payload.decode() == 'online':
+                    logging.debug(f"received hass status {message.payload}")
+                    if message.payload == b'online':
                         await self.send_hass_discovery()
 
     async def send_hass_discovery(self):
