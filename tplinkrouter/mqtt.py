@@ -7,20 +7,20 @@ from typing import Dict
 
 import aiomqtt
 
-from tplinkrouter.tplink_config import WIFI_ON_CMD, WIFI_OFF_CMD
+from .telnet import TelnetCommunicator
+from .tplink_config import WIFI_ON_CMD, WIFI_OFF_CMD
 
 
 @dataclass
 class MQTTCommunicator:
 
+    telnet_communicator: TelnetCommunicator
     client: aiomqtt.Client
-    state_message_queue: asyncio.Queue[Dict[str, str]]
-    command_messsage_queue: asyncio.Queue[str]
     discovery_prefix = 'homeassistant'
 
     async def publish_state(self):
         while True:
-            wifi_state = await self.state_message_queue.get()
+            wifi_state = await self.telnet_communicator.state_message_queue.get()
             payload = json.dumps(wifi_state)
             await self.client.publish("tplinkrouter/wifi", payload=payload)
             logging.debug(f'sent message to mqtt with payload: {payload}')
@@ -31,7 +31,7 @@ class MQTTCommunicator:
             async for message in messages:
                 logging.debug(f'received command with payload: {message.payload}')
                 try:
-                    self.command_messsage_queue.put_nowait(message.payload)
+                    self.telnet_communicator.command_messsage_queue.put_nowait(message.payload)
                 except QueueFull:
                     logging.warning('Command message queue is full')
 
@@ -49,7 +49,7 @@ class MQTTCommunicator:
             "icon": "mdi:wifi",
             "device": {
                 "identifiers": [
-                    "TD-W870"
+                    await self.telnet_communicator.get_serial()
                 ],
                 "manufacturer": "TPlink"
             }

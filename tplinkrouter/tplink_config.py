@@ -6,8 +6,11 @@ WIFI_ON_CMD = "wlctl set --switch on"
 WIFI_OFF_CMD = "wlctl set --switch off"
 QSS_ON_CMD = "wlctl set --qss on"
 QSS_OFF_CMD = "wlctl set --qss off"
+GET_SERIAL_CMD = "dev serial show"
 
 pattern = re.compile(r'(?P<key>\w+)=(?P<value>.+)\r\r')
+
+serial_pattern = re.compile(r'serialNumber=(.*)\r\r')
 
 
 def frame_to_dict(frame: str) -> Dict[str, str]:
