@@ -38,6 +38,7 @@ class TelnetCommunicator:
 
     async def execute_command(self, cmd: str) -> str:
         await self.lock.acquire()
+        logging.debug(f'execute command: {cmd}')
         self.writer.write(f'{cmd}\n')
         while True:
             outp = await self.reader.read(1024)
@@ -60,9 +61,9 @@ class TelnetCommunicator:
                         logging.warning('State message queue is full')
                 except TypeError:
                     logging.debug(f"malformed frame: {frame}")
-                break
             else:
                 logging.debug(f"receive unknown message: {outp}")
+            logging.debug('waiting for 10 seconds...')
             await asyncio.sleep(10)
 
     async def get_serial(self) -> str:
