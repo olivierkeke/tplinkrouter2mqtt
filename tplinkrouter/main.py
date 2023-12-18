@@ -40,7 +40,8 @@ async def launch():
 
     args = parser.parse_args()
     if args.log_level:
-        logging.basicConfig(level=args.log_level)
+        logging.basicConfig()
+        logging.getLogger().setLevel(args.log_level)
         logging.info(f'log level set to {logging.getLevelName(args.log_level)}')
     logging.info(f'Connecting to mqtt broker {args.mqtt_host}')
     telnet_communicator = TelnetCommunicator(
