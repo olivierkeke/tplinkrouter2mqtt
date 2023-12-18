@@ -50,7 +50,6 @@ class TelnetCommunicator:
     async def update(self):
         while True:
             outp = await self.execute_command(REFRESH_CMD)
-            self.writer.write(f'{REFRESH_CMD}\n')
             frame = frame_to_dict(outp)
             if frame:
                 try:
