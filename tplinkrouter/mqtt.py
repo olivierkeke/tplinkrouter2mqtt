@@ -66,7 +66,7 @@ class MQTTCommunicator:
             "device": device
         }
         await self.client.publish(
-            f"{self.discovery_prefix}/switch/{device['model']}/config",
+            f"{self.discovery_prefix}/switch/{device['model']}_wifi/config",
             payload=json.dumps(hass_discovery_switch)
         )
         hass_discovery_qss = {
@@ -83,7 +83,7 @@ class MQTTCommunicator:
             "device": device
         }
         await self.client.publish(
-            f"{self.discovery_prefix}/switch/{device['model']}/config",
+            f"{self.discovery_prefix}/switch/{device['model']}_qss/config",
             payload=json.dumps(hass_discovery_qss)
         )
         logging.info(f"hass discovery config sent: {hass_discovery_switch}")
