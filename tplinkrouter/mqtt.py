@@ -48,6 +48,8 @@ class MQTTCommunicator:
             "payload_off": WIFI_OFF_CMD,
             "icon": "mdi:wifi",
             "device": {
+                "name": f'TPLink {self.telnet_communicator.serial}',
+                "model": f'tplink_{self.telnet_communicator.serial}',
                 "identifiers": [
                     self.telnet_communicator.serial
                 ],
