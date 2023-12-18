@@ -66,7 +66,7 @@ class MQTTCommunicator:
             "name": "QSS",
             "state_topic": "tplinkrouter/wifi",
             "command_topic": "tplinkrouter/wifi/set",
-            "unique_id": "wifi_switch",
+            "unique_id": "qss_switch",
             "value_template": "{{ value_json.QSS }}",
             "state_on": "Enable",
             "state_off": "Disabled",
