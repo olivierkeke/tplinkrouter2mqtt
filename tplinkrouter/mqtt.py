@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Dict
 
 import aiomqtt
+from aiomqtt import Message
 
 from .telnet import TelnetCommunicator
 from .tplink_config import WIFI_ON_CMD, WIFI_OFF_CMD, QSS_ON_CMD, QSS_OFF_CMD
@@ -28,20 +29,18 @@ class MQTTCommunicator:
     async def listen_to_command(self):
         async with self.client.messages() as messages:
             await self.client.subscribe("tplinkrouter/wifi/set")
-            async for message in messages:
-                logging.debug(f'received command with payload: {message.payload}')
-                try:
-                    self.telnet_communicator.command_messsage_queue.put_nowait(message.payload)
-                except QueueFull:
-                    logging.warning('Command message queue is full')
-
-    async def listen_hass_status(self):
-        async with self.client.messages() as messages:
             await self.client.subscribe("homeassistant/status")
             async for message in messages:
-                logging.debug(f'received hass status: {message.payload}')
-                if message.payload.decode() == 'online':
-                    await self.send_hass_discovery()
+                message: Message
+                logging.debug(f'received message with payload: {message.payload}')
+                if message.topic == "tplinkrouter/wifi/set":
+                    try:
+                        self.telnet_communicator.command_messsage_queue.put_nowait(message.payload)
+                    except QueueFull:
+                        logging.warning('Command message queue is full')
+                elif message.topic == "homeassistant/status":
+                    if message.payload.decode() == 'online':
+                        await self.send_hass_discovery()
 
     async def send_hass_discovery(self):
         device = {

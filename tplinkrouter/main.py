@@ -63,7 +63,6 @@ async def launch():
         await asyncio.gather(
             mqtt_communicator.publish_state(),
             mqtt_communicator.listen_to_command(),
-            mqtt_communicator.listen_hass_status()
             )
 
 
