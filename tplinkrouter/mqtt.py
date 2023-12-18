@@ -49,7 +49,7 @@ class MQTTCommunicator:
             "icon": "mdi:wifi",
             "device": {
                 "identifiers": [
-                    await self.telnet_communicator.get_serial()
+                    self.telnet_communicator.serial
                 ],
                 "manufacturer": "TPlink"
             }
