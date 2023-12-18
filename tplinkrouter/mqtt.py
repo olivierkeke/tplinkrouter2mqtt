@@ -35,7 +35,15 @@ class MQTTCommunicator:
                 except QueueFull:
                     logging.warning('Command message queue is full')
 
-    async def hass_discovery(self):
+    async def listen_hass_status(self):
+        async with self.client.messages() as messages:
+            await self.client.subscribe("homeassistant/status")
+            async for message in messages:
+                logging.debug(f'received hass status: {message.payload}')
+                if message.payload.decode() == 'online':
+                    await self.send_hass_discovery()
+
+    async def send_hass_discovery(self):
         device = {
             "name": f'TPLink {self.telnet_communicator.serial}',
             "model": f'tplink_{self.telnet_communicator.serial}',

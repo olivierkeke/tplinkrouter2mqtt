@@ -60,10 +60,10 @@ async def launch():
             client=client,
             telnet_communicator=telnet_communicator
         )
-        await mqtt_communicator.hass_discovery()
         await asyncio.gather(
             mqtt_communicator.publish_state(),
             mqtt_communicator.listen_to_command(),
+            mqtt_communicator.listen_hass_status()
             )
 
 
