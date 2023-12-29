@@ -1,4 +1,4 @@
-# Gateway between tplink router (telnet) and MQTT
+# Gateway between TPlink router (via telnet) and MQTT
 
 ## Supported devices
 
