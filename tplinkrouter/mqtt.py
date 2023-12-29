@@ -110,5 +110,17 @@ class MQTTCommunicator:
             f"{self.discovery_prefix}/sensor/{device['model']}_secmode/config",
             payload=json.dumps(hass_discovery_secmode)
         )
+        hass_discovery_bandwidth = {
+            "name": "bandWidth",
+            "state_topic": "tplinkrouter/wifi",
+            "unique_id": "secmode_sensor",
+            "value_template": "{{ value_json.andWidth }}",
+            "icon": "mdi:wifi",
+            "device": device
+        }
+        await self.client.publish(
+            f"{self.discovery_prefix}/sensor/{device['model']}_bandwidth/config",
+            payload=json.dumps(hass_discovery_bandwidth)
+        )
         logging.info(f"hass discovery config sent")
 
