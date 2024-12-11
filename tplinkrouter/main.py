@@ -50,20 +50,20 @@ async def launch():
         host=args.tplink_host
     )
     await telnet_communicator.launch()
-    async with aiomqtt.Client(
+    client = aiomqtt.Client(
             hostname=args.mqtt_host,
             port=args.mqtt_port,
             username=args.mqtt_username,
             password=args.mqtt_password
-    ) as client:
-        mqtt_communicator = MQTTCommunicator(
-            client=client,
-            telnet_communicator=telnet_communicator
-        )
-        await asyncio.gather(
-            mqtt_communicator.publish_state(),
-            mqtt_communicator.listen_to_command(),
-            )
+    )
+    mqtt_communicator = MQTTCommunicator(
+        client=client,
+        telnet_communicator=telnet_communicator
+    )
+    await asyncio.gather(
+        mqtt_communicator.publish_state(),
+        mqtt_communicator.listen_to_command(),
+    )
 
 
 if __name__ == '__main__':
