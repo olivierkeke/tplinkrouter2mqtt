@@ -1,2 +1,2 @@
-telnetlib3
-aiomqtt
+telnetlib3==2.0
+aiomqtt==2.3
