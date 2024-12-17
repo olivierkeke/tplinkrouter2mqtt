@@ -28,13 +28,19 @@ class TelnetCommunicator:
     listen_task: Optional[Task] = None
     update_task: Optional[Task] = None
     lock = asyncio.Lock()
+    interval = 5
 
     async def listen_command(self):
-        if self.command_messsage_queue is not None:
-            while True:
-                cmd = await self.command_messsage_queue.get()
-                logging.debug(f"writing command: {cmd.decode()}")
-                self.writer.write(f'{cmd.decode()}\n')
+        try:
+            if self.command_messsage_queue is not None:
+                while True:
+                    cmd = await self.command_messsage_queue.get()
+                    logging.debug(f"writing command: {cmd.decode()}")
+                    self.writer.write(f'{cmd.decode()}\n')
+        except:
+            print(f"Connection to telnet server lost; Reconnecting in {self.interval} seconds ...")
+            await asyncio.sleep(self.interval)
+            self.launch()
 
     async def execute_command(self, cmd: str) -> str:
         await self.lock.acquire()
@@ -90,7 +96,21 @@ class TelnetCommunicator:
                 logging.debug(f"receive unknown message: {outp}")
 
     async def launch(self):
-        self.reader, self.writer = await telnetlib3.open_connection(self.host, 23)
+        if self.listen_task is not None:
+            self.listen_task.cancel()
+            self.listen_task = None
+        if self.update_task is not None:
+            self.update_task.cancel()
+            self.update_task = None
+        success = False
+        while not success:
+            try:
+                self.reader, self.writer = await telnetlib3.open_connection(self.host, 23)
+                success = True
+            except:
+                print(f"Can't connect to telnet server; Reconnecting in {self.interval} seconds ...")
+                await asyncio.sleep(self.interval)
+
         logging.info(f'connected to telnet server {self.host}')
         await self.authenticate()
         logging.info(f'authenticated to telnet server {self.host}')
