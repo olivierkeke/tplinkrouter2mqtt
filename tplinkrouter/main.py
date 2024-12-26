@@ -63,16 +63,12 @@ async def launch():
     while True:
         try:
             async with telnet_communicator:
-                logging.info("launching MQTT listening and publishing task")
-                await mqtt_communicator.send_hass_discovery()
-                logging.info("HASS discovery message sent")
                 await asyncio.gather(
                     mqtt_communicator.publish_state(),
                     mqtt_communicator.listen_to_command(),
                 )
-                logging.info("MQTT listening and publishing task terminated")
         except:
-            logging.warning("Connection to telnet server lost; Reconnecting in %i seconds ...", interval)
+            print(f"Connection to telnet server lost; Reconnecting in {self.interval} seconds ...")
             await asyncio.sleep(interval)
 
 
