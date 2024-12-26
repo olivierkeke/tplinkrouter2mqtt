@@ -68,7 +68,7 @@ async def launch():
                     mqtt_communicator.listen_to_command(),
                 )
         except:
-            print(f"Connection to telnet server lost; Reconnecting in {self.interval} seconds ...")
+            print(f"Connection to telnet server lost; Reconnecting in {interval} seconds ...")
             await asyncio.sleep(interval)
 
 
