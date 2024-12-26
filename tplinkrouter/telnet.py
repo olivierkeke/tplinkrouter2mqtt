@@ -108,10 +108,11 @@ class TelnetCommunicator:
         self.update_task = asyncio.create_task(self.update())
         logging.info(f'telnet communicator launched')
 
-    async def __aexit__(self):
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
         if self.listen_task is not None:
             self.listen_task.cancel()
         if self.update_task is not None:
             self.update_task.cancel()
         self.writer.write('logout\n')
         await self.writer.protocol.waiter_closed
+        logging.info(f'telnet communicator closed')
