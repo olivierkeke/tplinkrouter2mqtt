@@ -11,6 +11,7 @@ from tplinkrouter.telnet import TelnetCommunicator
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
+interval = 5
 
 
 def parse_log(log_level: Union[str, int]) -> int:
@@ -49,21 +50,26 @@ async def launch():
         password=args.tplink_password,
         host=args.tplink_host
     )
-    await telnet_communicator.launch()
     client = aiomqtt.Client(
-            hostname=args.mqtt_host,
-            port=args.mqtt_port,
-            username=args.mqtt_username,
-            password=args.mqtt_password
-    )
+                hostname=args.mqtt_host,
+                port=args.mqtt_port,
+                username=args.mqtt_username,
+                password=args.mqtt_password
+        )
     mqtt_communicator = MQTTCommunicator(
         client=client,
         telnet_communicator=telnet_communicator
     )
-    await asyncio.gather(
-        mqtt_communicator.publish_state(),
-        mqtt_communicator.listen_to_command(),
-    )
+    while True:
+        try:
+            async with telnet_communicator:
+                await asyncio.gather(
+                    mqtt_communicator.publish_state(),
+                    mqtt_communicator.listen_to_command(),
+                )
+        except:
+            print(f"Connection to telnet server lost; Reconnecting in {self.interval} seconds ...")
+            await asyncio.sleep(interval)
 
 
 if __name__ == '__main__':
