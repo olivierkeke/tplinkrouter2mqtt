@@ -113,4 +113,3 @@ class TelnetCommunicator:
             self.update_task.cancel()
         self.writer.write('logout\n')
         await self.writer.protocol.waiter_closed
-        logging.info("telnet communicator closed")

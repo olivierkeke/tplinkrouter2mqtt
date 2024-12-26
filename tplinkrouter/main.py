@@ -63,11 +63,10 @@ async def launch():
     while True:
         try:
             async with telnet_communicator:
-                async with client:
-                    await asyncio.gather(
-                        mqtt_communicator.publish_state(),
-                        mqtt_communicator.listen_to_command(),
-                    )
+                await asyncio.gather(
+                    mqtt_communicator.publish_state(),
+                    mqtt_communicator.listen_to_command(),
+                )
         except:
             print(f"Connection to telnet server lost; Reconnecting in {interval} seconds ...")
             await asyncio.sleep(interval)
