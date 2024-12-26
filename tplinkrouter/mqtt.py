@@ -37,7 +37,7 @@ class MQTTCommunicator:
         while True:
             try:
                 async with self.client:
-                    async with self.client.messages() as messages:
+                    async with self.client.messages as messages:
                         await self.client.subscribe("tplinkrouter/wifi/set")
                         await self.client.subscribe("homeassistant/status")
                         async for message in messages:
