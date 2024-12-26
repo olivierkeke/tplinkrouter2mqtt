@@ -37,20 +37,21 @@ class MQTTCommunicator:
         while True:
             try:
                 async with self.client:
-                    await self.client.subscribe("tplinkrouter/wifi/set")
-                    await self.client.subscribe("homeassistant/status")
-                    async for message in self.client.messages:
-                        message: Message
-                        logging.debug("received message with payload: %s on topic %s", message.payload, message.topic)
-                        if message.topic.matches("tplinkrouter/wifi/set"):
-                            try:
-                                self.telnet_communicator.command_messsage_queue.put_nowait(message.payload)
-                            except QueueFull:
-                                logging.warning('Command message queue is full')
-                        elif message.topic.matches("homeassistant/status"):
-                            logging.debug("received hass status %s", message.payload)
-                            if message.payload == b'online':
-                                await self.send_hass_discovery()
+                    async with self.client.messages as messages:
+                        await self.client.subscribe("tplinkrouter/wifi/set")
+                        await self.client.subscribe("homeassistant/status")
+                        async for message in messages:
+                            message: Message
+                            logging.debug(f'received message with payload: {message.payload} on topic {message.topic}')
+                            if message.topic.matches("tplinkrouter/wifi/set"):
+                                try:
+                                    self.telnet_communicator.command_messsage_queue.put_nowait(message.payload)
+                                except QueueFull:
+                                    logging.warning('Command message queue is full')
+                            elif message.topic.matches("homeassistant/status"):
+                                logging.debug(f"received hass status {message.payload}")
+                                if message.payload == b'online':
+                                    await self.send_hass_discovery()
             except aiomqtt.MqttError:
                 logging.warning("Connection lost; Reconnecting in %i seconds ...", self.interval)
                 await asyncio.sleep(self.interval)
