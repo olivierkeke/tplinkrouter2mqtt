@@ -64,6 +64,8 @@ async def launch():
         try:
             async with telnet_communicator:
                 logging.info("launching MQTT listening and publishing task")
+                await mqtt_communicator.send_hass_discovery()
+                logging.info("HASS discovery message sent")
                 await asyncio.gather(
                     mqtt_communicator.publish_state(),
                     mqtt_communicator.listen_to_command(),
