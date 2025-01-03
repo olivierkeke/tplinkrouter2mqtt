@@ -70,7 +70,7 @@ async def launch():
                 )
                 logging.info("MQTT listening and publishing task terminated")
         except:
-            logging.warn("Connection to telnet server lost; Reconnecting in %i seconds ...", interval)
+            logging.warning("Connection to telnet server lost; Reconnecting in %i seconds ...", interval)
             await asyncio.sleep(interval)
 
 
