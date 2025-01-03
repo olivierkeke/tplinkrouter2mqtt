@@ -78,10 +78,11 @@ class MQTTCommunicator:
             "icon": "mdi:wifi",
             "device": device
         }
-        await self.client.publish(
-            f"{self.discovery_prefix}/switch/{device['model']}_wifi/config",
-            payload=json.dumps(hass_discovery_switch)
-        )
+        async with self.client:
+            await self.client.publish(
+                f"{self.discovery_prefix}/switch/{device['model']}_wifi/config",
+                payload=json.dumps(hass_discovery_switch)
+            )
         hass_discovery_qss = {
             "name": "QSS",
             "state_topic": "tplinkrouter/wifi",
@@ -95,10 +96,11 @@ class MQTTCommunicator:
             "icon": "mdi:wifi",
             "device": device
         }
-        await self.client.publish(
-            f"{self.discovery_prefix}/switch/{device['model']}_qss/config",
-            payload=json.dumps(hass_discovery_qss)
-        )
+        async with self.client:
+            await self.client.publish(
+                f"{self.discovery_prefix}/switch/{device['model']}_qss/config",
+                payload=json.dumps(hass_discovery_qss)
+            )
         hass_discovery_ssid = {
             "name": "SSID",
             "state_topic": "tplinkrouter/wifi",
@@ -107,10 +109,11 @@ class MQTTCommunicator:
             "icon": "mdi:wifi",
             "device": device
         }
-        await self.client.publish(
-            f"{self.discovery_prefix}/sensor/{device['model']}_ssid/config",
-            payload=json.dumps(hass_discovery_ssid)
-        )
+        async with self.client:
+            await self.client.publish(
+                f"{self.discovery_prefix}/sensor/{device['model']}_ssid/config",
+                payload=json.dumps(hass_discovery_ssid)
+            )
         hass_discovery_secmode = {
             "name": "SecMode",
             "state_topic": "tplinkrouter/wifi",
@@ -119,10 +122,11 @@ class MQTTCommunicator:
             "icon": "mdi:wifi",
             "device": device
         }
-        await self.client.publish(
-            f"{self.discovery_prefix}/sensor/{device['model']}_secmode/config",
-            payload=json.dumps(hass_discovery_secmode)
-        )
+        async with self.client:
+            await self.client.publish(
+                f"{self.discovery_prefix}/sensor/{device['model']}_secmode/config",
+                payload=json.dumps(hass_discovery_secmode)
+            )
         hass_discovery_bandwidth = {
             "name": "bandWidth",
             "state_topic": "tplinkrouter/wifi",
@@ -131,8 +135,9 @@ class MQTTCommunicator:
             "icon": "mdi:wifi",
             "device": device
         }
-        await self.client.publish(
-            f"{self.discovery_prefix}/sensor/{device['model']}_bandwidth/config",
-            payload=json.dumps(hass_discovery_bandwidth)
-        )
+        async with self.client:
+            await self.client.publish(
+                f"{self.discovery_prefix}/sensor/{device['model']}_bandwidth/config",
+                payload=json.dumps(hass_discovery_bandwidth)
+            )
         logging.info("hass discovery config sent")
