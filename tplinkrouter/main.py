@@ -43,8 +43,8 @@ async def launch():
     if args.log_level:
         logging.basicConfig()
         logging.getLogger().setLevel(args.log_level)
-        logging.info(f'log level set to {logging.getLevelName(args.log_level)}')
-    logging.info(f'Connecting to mqtt broker {args.mqtt_host}')
+        logging.info('log level set to %s', logging.getLevelName(args.log_level))
+    logging.info('Connecting to mqtt broker %s', args.mqtt_host)
     telnet_communicator = TelnetCommunicator(
         username=args.tplink_username,
         password=args.tplink_password,
@@ -63,12 +63,14 @@ async def launch():
     while True:
         try:
             async with telnet_communicator:
+                logging.info("launching MQTT listening and publishing task")
                 await asyncio.gather(
                     mqtt_communicator.publish_state(),
                     mqtt_communicator.listen_to_command(),
                 )
+                logging.info("MQTT listening and publishing task terminated")
         except:
-            print(f"Connection to telnet server lost; Reconnecting in {interval} seconds ...")
+            logging.warn("Connection to telnet server lost; Reconnecting in %i seconds ...", interval)
             await asyncio.sleep(interval)
 
 
