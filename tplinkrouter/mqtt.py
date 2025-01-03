@@ -23,6 +23,7 @@ class MQTTCommunicator:
         while True:
             wifi_state = await self.telnet_communicator.state_message_queue.get()
             payload = json.dumps(wifi_state)
+            logging.debug("received message from telnet communicator: %s", payload)
             try:
                 async with self.client:
                     await self.client.publish("tplinkrouter/wifi", payload=payload)
@@ -47,7 +48,7 @@ class MQTTCommunicator:
                             except QueueFull:
                                 logging.warning('Command message queue is full')
                         elif message.topic.matches("homeassistant/status"):
-                            logging.debug("received hass status %s", message.payloa)
+                            logging.debug("received hass status %s", message.payload)
                             if message.payload == b'online':
                                 await self.send_hass_discovery()
             except aiomqtt.MqttError:
