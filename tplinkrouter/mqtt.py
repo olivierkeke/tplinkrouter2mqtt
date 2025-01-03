@@ -127,7 +127,7 @@ class MQTTCommunicator:
         logging.info("hass discovery config sent")
 
     async def __aenter__(self):
-        self.client.__aenter__()
+        await self.client.__aenter__()
 
     async def __aexit__(self, exc_type, exc, tb):
-        self.client.__aexit__(exc_type, exc, tb)
+        await self.client.__aexit__(exc_type, exc, tb)
