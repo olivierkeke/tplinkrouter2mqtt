@@ -3,7 +3,6 @@ import json
 import logging
 from asyncio import QueueFull
 from dataclasses import dataclass
-from typing import Dict
 
 import aiomqtt
 from aiomqtt import Message
@@ -27,34 +26,33 @@ class MQTTCommunicator:
             try:
                 async with self.client:
                     await self.client.publish("tplinkrouter/wifi", payload=payload)
-                    logging.debug(f'sent message to mqtt with payload: {payload}')
+                    logging.debug("sent message to mqtt with payload: %s", payload)
             except aiomqtt.MqttError:
-                print(f"Connection lost; Reconnecting in {interval} seconds ...")
-                await asyncio.sleep(interval)
+                print(f"Connection lost; Reconnecting in {self.interval} seconds ...")
+                await asyncio.sleep(self.interval)
 
 
     async def listen_to_command(self):
         while True:
             try:
                 async with self.client:
-                    async with self.client.messages as messages:
-                        await self.client.subscribe("tplinkrouter/wifi/set")
-                        await self.client.subscribe("homeassistant/status")
-                        async for message in messages:
-                            message: Message
-                            logging.debug(f'received message with payload: {message.payload} on topic {message.topic}')
-                            if message.topic.matches("tplinkrouter/wifi/set"):
-                                try:
-                                    self.telnet_communicator.command_messsage_queue.put_nowait(message.payload)
-                                except QueueFull:
-                                    logging.warning('Command message queue is full')
-                            elif message.topic.matches("homeassistant/status"):
-                                logging.debug(f"received hass status {message.payload}")
-                                if message.payload == b'online':
-                                    await self.send_hass_discovery()
+                    await self.client.subscribe("tplinkrouter/wifi/set")
+                    await self.client.subscribe("homeassistant/status")
+                    async for message in self.client.messages:
+                        message: Message
+                        logging.debug("received message with payload: %s on topic %s", message.payload, message.topic)
+                        if message.topic.matches("tplinkrouter/wifi/set"):
+                            try:
+                                self.telnet_communicator.command_messsage_queue.put_nowait(message.payload)
+                            except QueueFull:
+                                logging.warning('Command message queue is full')
+                        elif message.topic.matches("homeassistant/status"):
+                            logging.debug("received hass status %s", message.payloa)
+                            if message.payload == b'online':
+                                await self.send_hass_discovery()
             except aiomqtt.MqttError:
-                print(f"Connection lost; Reconnecting in {interval} seconds ...")
-                await asyncio.sleep(interval)
+                logging.warning("Connection lost; Reconnecting in %i seconds ...", self.interval)
+                await asyncio.sleep(self.interval)
             
 
     async def send_hass_discovery(self):
@@ -136,5 +134,4 @@ class MQTTCommunicator:
             f"{self.discovery_prefix}/sensor/{device['model']}_bandwidth/config",
             payload=json.dumps(hass_discovery_bandwidth)
         )
-        logging.info(f"hass discovery config sent")
-
+        logging.info("hass discovery config sent")
