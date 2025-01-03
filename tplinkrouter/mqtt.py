@@ -24,36 +24,25 @@ class MQTTCommunicator:
             wifi_state = await self.telnet_communicator.state_message_queue.get()
             payload = json.dumps(wifi_state)
             logging.debug("received message from telnet communicator: %s", payload)
-            try:
-                async with self.client:
-                    await self.client.publish("tplinkrouter/wifi", payload=payload)
-                    logging.debug("sent message to mqtt with payload: %s", payload)
-            except aiomqtt.MqttError:
-                print(f"Connection lost; Reconnecting in {self.interval} seconds ...")
-                await asyncio.sleep(self.interval)
+            await self.client.publish("tplinkrouter/wifi", payload=payload)
+            logging.debug("sent message to mqtt with payload: %s", payload)
 
 
     async def listen_to_command(self):
-        while True:
-            try:
-                async with self.client:
-                    await self.client.subscribe("tplinkrouter/wifi/set")
-                    await self.client.subscribe("homeassistant/status")
-                    async for message in self.client.messages:
-                        message: Message
-                        logging.debug("received message with payload: %s on topic %s", message.payload, message.topic)
-                        if message.topic.matches("tplinkrouter/wifi/set"):
-                            try:
-                                self.telnet_communicator.command_messsage_queue.put_nowait(message.payload)
-                            except QueueFull:
-                                logging.warning('Command message queue is full')
-                        elif message.topic.matches("homeassistant/status"):
-                            logging.debug("received hass status %s", message.payload)
-                            if message.payload == b'online':
-                                await self.send_hass_discovery()
-            except aiomqtt.MqttError:
-                logging.warning("Connection lost; Reconnecting in %i seconds ...", self.interval)
-                await asyncio.sleep(self.interval)
+        await self.client.subscribe("tplinkrouter/wifi/set")
+        await self.client.subscribe("homeassistant/status")
+        async for message in self.client.messages:
+            message: Message
+            logging.debug("received message with payload: %s on topic %s", message.payload, message.topic)
+            if message.topic.matches("tplinkrouter/wifi/set"):
+                try:
+                    self.telnet_communicator.command_messsage_queue.put_nowait(message.payload)
+                except QueueFull:
+                    logging.warning('Command message queue is full')
+            elif message.topic.matches("homeassistant/status"):
+                logging.debug("received hass status %s", message.payload)
+                if message.payload == b'online':
+                    await self.send_hass_discovery()
             
 
     async def send_hass_discovery(self):
@@ -78,11 +67,10 @@ class MQTTCommunicator:
             "icon": "mdi:wifi",
             "device": device
         }
-        async with self.client:
-            await self.client.publish(
-                f"{self.discovery_prefix}/switch/{device['model']}_wifi/config",
-                payload=json.dumps(hass_discovery_switch)
-            )
+        await self.client.publish(
+            f"{self.discovery_prefix}/switch/{device['model']}_wifi/config",
+            payload=json.dumps(hass_discovery_switch)
+        )
         hass_discovery_qss = {
             "name": "QSS",
             "state_topic": "tplinkrouter/wifi",
@@ -96,11 +84,10 @@ class MQTTCommunicator:
             "icon": "mdi:wifi",
             "device": device
         }
-        async with self.client:
-            await self.client.publish(
-                f"{self.discovery_prefix}/switch/{device['model']}_qss/config",
-                payload=json.dumps(hass_discovery_qss)
-            )
+        await self.client.publish(
+            f"{self.discovery_prefix}/switch/{device['model']}_qss/config",
+            payload=json.dumps(hass_discovery_qss)
+        )
         hass_discovery_ssid = {
             "name": "SSID",
             "state_topic": "tplinkrouter/wifi",
@@ -109,11 +96,10 @@ class MQTTCommunicator:
             "icon": "mdi:wifi",
             "device": device
         }
-        async with self.client:
-            await self.client.publish(
-                f"{self.discovery_prefix}/sensor/{device['model']}_ssid/config",
-                payload=json.dumps(hass_discovery_ssid)
-            )
+        await self.client.publish(
+            f"{self.discovery_prefix}/sensor/{device['model']}_ssid/config",
+            payload=json.dumps(hass_discovery_ssid)
+        )
         hass_discovery_secmode = {
             "name": "SecMode",
             "state_topic": "tplinkrouter/wifi",
@@ -122,11 +108,10 @@ class MQTTCommunicator:
             "icon": "mdi:wifi",
             "device": device
         }
-        async with self.client:
-            await self.client.publish(
-                f"{self.discovery_prefix}/sensor/{device['model']}_secmode/config",
-                payload=json.dumps(hass_discovery_secmode)
-            )
+        await self.client.publish(
+            f"{self.discovery_prefix}/sensor/{device['model']}_secmode/config",
+            payload=json.dumps(hass_discovery_secmode)
+        )
         hass_discovery_bandwidth = {
             "name": "bandWidth",
             "state_topic": "tplinkrouter/wifi",
@@ -135,9 +120,8 @@ class MQTTCommunicator:
             "icon": "mdi:wifi",
             "device": device
         }
-        async with self.client:
-            await self.client.publish(
-                f"{self.discovery_prefix}/sensor/{device['model']}_bandwidth/config",
-                payload=json.dumps(hass_discovery_bandwidth)
-            )
+        await self.client.publish(
+            f"{self.discovery_prefix}/sensor/{device['model']}_bandwidth/config",
+            payload=json.dumps(hass_discovery_bandwidth)
+        )
         logging.info("hass discovery config sent")
