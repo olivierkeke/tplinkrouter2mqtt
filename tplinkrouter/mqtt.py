@@ -135,8 +135,9 @@ class MQTTCommunicator:
             "icon": "mdi:wifi",
             "device": device
         }
-        await self.client.publish(
-            f"{self.discovery_prefix}/sensor/{device['model']}_bandwidth/config",
-            payload=json.dumps(hass_discovery_bandwidth)
-        )
+        async with self.client:
+            await self.client.publish(
+                f"{self.discovery_prefix}/sensor/{device['model']}_bandwidth/config",
+                payload=json.dumps(hass_discovery_bandwidth)
+            )
         logging.info("hass discovery config sent")
