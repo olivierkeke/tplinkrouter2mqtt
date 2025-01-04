@@ -18,6 +18,7 @@ class TelnetCommunicator:
     username: str
     password: str
     host: str
+    port: int
     state_message_queue: asyncio.Queue[Dict[str, str]] = asyncio.Queue()
     command_messsage_queue: asyncio.Queue[str] = asyncio.Queue()
     reader: Optional[TelnetReader] = None
@@ -95,7 +96,7 @@ class TelnetCommunicator:
             self.update_task.cancel()
             self.update_task = None
 
-        self.reader, self.writer = await telnetlib3.open_connection(self.host, 23)
+        self.reader, self.writer = await telnetlib3.open_connection(self.host, self.port)
 
         logging.info("connected to telnet server %s", self.host)
         await self.authenticate()
