@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 from asyncio import QueueFull
@@ -12,7 +11,7 @@ from .tplink_config import WIFI_ON_CMD, WIFI_OFF_CMD, QSS_ON_CMD, QSS_OFF_CMD
 
 
 @dataclass
-class MQTTCommunicator:
+class TpLinkRouterToMQTTCommunicator:
 
     telnet_communicator: TelnetCommunicator
     client: aiomqtt.Client
@@ -127,7 +126,9 @@ class MQTTCommunicator:
         logging.info("hass discovery config sent")
 
     async def __aenter__(self):
+        await self.telnet_communicator.__aenter__()
         await self.client.__aenter__()
 
     async def __aexit__(self, exc_type, exc, tb):
         await self.client.__aexit__(exc_type, exc, tb)
+        await self.telnet_communicator.__aexit__(exc_type, exc, tb)

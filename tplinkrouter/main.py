@@ -6,7 +6,7 @@ from typing import Union
 
 import aiomqtt
 
-from tplinkrouter.mqtt import MQTTCommunicator
+from tplinkrouter.mqtt import TpLinkRouterToMQTTCommunicator
 from tplinkrouter.telnet import TelnetCommunicator
 
 logging.basicConfig()
@@ -56,20 +56,19 @@ async def launch():
                 username=args.mqtt_username,
                 password=args.mqtt_password
         )
-    mqtt_communicator = MQTTCommunicator(
+    mqtt_communicator = TpLinkRouterToMQTTCommunicator(
         client=client,
         telnet_communicator=telnet_communicator
     )
     while True:
         try:
-            async with telnet_communicator:
-                logging.info("launching MQTT listening and publishing task")
-                async with mqtt_communicator:
-                    await asyncio.gather(
-                        mqtt_communicator.publish_state(),
-                        mqtt_communicator.listen_to_command(),
-                    )
-                logging.info("MQTT listening and publishing task terminated")
+            logging.info("launching MQTT listening and publishing task")
+            async with mqtt_communicator:
+                await asyncio.gather(
+                    mqtt_communicator.publish_state(),
+                    mqtt_communicator.listen_to_command(),
+                )
+            logging.info("MQTT listening and publishing task terminated")
         except:
             logging.warning("Connection to telnet or mqtt server lost; Reconnecting in %i seconds ...", interval)
             await asyncio.sleep(interval)
