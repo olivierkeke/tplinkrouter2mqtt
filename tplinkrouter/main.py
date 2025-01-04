@@ -30,10 +30,10 @@ async def launch():
         port=settings.tplink.port
     )
     client = aiomqtt.Client(
-                hostname=settings.mqtt_host,
-                port=settings.mqtt_port,
-                username=settings.mqtt_username,
-                password=settings.mqtt_password
+                hostname=settings.mqtt.host,
+                port=settings.mqtt.port,
+                username=settings.mqtt.username,
+                password=settings.mqtt.password
         )
     mqtt_communicator = TpLinkRouterToMQTTCommunicator(
         client=client,
