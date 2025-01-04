@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         cli_parse_args=True, 
         cli_prog_name="tplinkrouter2mqtt",
+        env_nested_delimiter="__"
         )
 
     tplink: ConnectionSettings
