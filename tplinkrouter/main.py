@@ -11,6 +11,7 @@ from tplinkrouter.telnet import TelnetCommunicator
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
+interval = 5
 
 
 def parse_log(log_level: Union[str, int]) -> int:
@@ -42,28 +43,37 @@ async def launch():
     if args.log_level:
         logging.basicConfig()
         logging.getLogger().setLevel(args.log_level)
-        logging.info(f'log level set to {logging.getLevelName(args.log_level)}')
-    logging.info(f'Connecting to mqtt broker {args.mqtt_host}')
+        logging.info('log level set to %s', logging.getLevelName(args.log_level))
+    logging.info('Connecting to mqtt broker %s', args.mqtt_host)
     telnet_communicator = TelnetCommunicator(
         username=args.tplink_username,
         password=args.tplink_password,
         host=args.tplink_host
     )
-    await telnet_communicator.launch()
     client = aiomqtt.Client(
-            hostname=args.mqtt_host,
-            port=args.mqtt_port,
-            username=args.mqtt_username,
-            password=args.mqtt_password
-    )
+                hostname=args.mqtt_host,
+                port=args.mqtt_port,
+                username=args.mqtt_username,
+                password=args.mqtt_password
+        )
     mqtt_communicator = MQTTCommunicator(
         client=client,
         telnet_communicator=telnet_communicator
     )
-    await asyncio.gather(
-        mqtt_communicator.publish_state(),
-        mqtt_communicator.listen_to_command(),
-    )
+    while True:
+        try:
+            async with telnet_communicator:
+                logging.info("launching MQTT listening and publishing task")
+                await mqtt_communicator.send_hass_discovery()
+                logging.info("HASS discovery message sent")
+                await asyncio.gather(
+                    mqtt_communicator.publish_state(),
+                    mqtt_communicator.listen_to_command(),
+                )
+                logging.info("MQTT listening and publishing task terminated")
+        except:
+            logging.warning("Connection to telnet server lost; Reconnecting in %i seconds ...", interval)
+            await asyncio.sleep(interval)
 
 
 if __name__ == '__main__':

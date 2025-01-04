@@ -3,11 +3,9 @@ import json
 import logging
 from asyncio import QueueFull, Task
 from dataclasses import dataclass
-from functools import cached_property
 from typing import Dict, Optional
 
 import telnetlib3
-from threading import Timer
 
 from telnetlib3 import TelnetReader, TelnetWriter
 
@@ -28,23 +26,17 @@ class TelnetCommunicator:
     listen_task: Optional[Task] = None
     update_task: Optional[Task] = None
     lock = asyncio.Lock()
-    interval = 5
 
     async def listen_command(self):
-        try:
-            if self.command_messsage_queue is not None:
-                while True:
-                    cmd = await self.command_messsage_queue.get()
-                    logging.debug(f"writing command: {cmd.decode()}")
-                    self.writer.write(f'{cmd.decode()}\n')
-        except:
-            print(f"Connection to telnet server lost; Reconnecting in {self.interval} seconds ...")
-            await asyncio.sleep(self.interval)
-            self.launch()
+        if self.command_messsage_queue is not None:
+            while True:
+                cmd = await self.command_messsage_queue.get()
+                logging.debug("writing command: %s", cmd.decode())
+                self.writer.write(f'{cmd.decode()}\n')
 
     async def execute_command(self, cmd: str) -> str:
         await self.lock.acquire()
-        logging.debug(f'execute command: {cmd}')
+        logging.debug("execute command: %s", cmd)
         self.writer.write(f'{cmd}\n')
         while True:
             outp = await self.reader.read(1024)
@@ -52,7 +44,7 @@ class TelnetCommunicator:
                 self.lock.release()
                 return outp
             else:
-                logging.debug(f'receive unknown msg: {outp}')
+                logging.debug("receive unknown msg: %s", outp)
 
     async def update(self):
         while True:
@@ -66,15 +58,15 @@ class TelnetCommunicator:
                     except QueueFull:
                         logging.warning('State message queue is full')
                 except TypeError:
-                    logging.debug(f"malformed frame: {frame}")
+                    logging.debug("malformed frame: %s", frame)
             else:
-                logging.debug(f"receive unknown message: {outp}")
+                logging.debug("receive unknown message: %s", outp)
             logging.debug('waiting for 10 seconds...')
             await asyncio.sleep(10)
 
     async def get_serial(self) -> str:
         outp = await self.execute_command(GET_SERIAL_CMD)
-        logging.debug(f"received message: {outp}")
+        logging.debug("received message: %s", outp)
         result = serial_pattern.search(outp)
         return result.group(1)
 
@@ -93,37 +85,32 @@ class TelnetCommunicator:
             elif 'Welcome' in outp:
                 break
             else:
-                logging.debug(f"receive unknown message: {outp}")
+                logging.debug("receive unknown message: %s", outp)
 
-    async def launch(self):
+    async def __aenter__(self):
         if self.listen_task is not None:
             self.listen_task.cancel()
             self.listen_task = None
         if self.update_task is not None:
             self.update_task.cancel()
             self.update_task = None
-        success = False
-        while not success:
-            try:
-                self.reader, self.writer = await telnetlib3.open_connection(self.host, 23)
-                success = True
-            except:
-                print(f"Can't connect to telnet server; Reconnecting in {self.interval} seconds ...")
-                await asyncio.sleep(self.interval)
 
-        logging.info(f'connected to telnet server {self.host}')
+        self.reader, self.writer = await telnetlib3.open_connection(self.host, 23)
+
+        logging.info("connected to telnet server %s", self.host)
         await self.authenticate()
-        logging.info(f'authenticated to telnet server {self.host}')
+        logging.info("authenticated to telnet server %s", self.host)
         self.serial = await self.get_serial()
-        logging.info(f'device serial: {self.serial}')
+        logging.info("device serial: %s" ,self.serial)
         self.listen_task = asyncio.create_task(self.listen_command())
         self.update_task = asyncio.create_task(self.update())
-        logging.info(f'telnet communicator launched')
+        logging.info("telnet communicator launched")
 
-    async def close(self):
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
         if self.listen_task is not None:
             self.listen_task.cancel()
         if self.update_task is not None:
             self.update_task.cancel()
         self.writer.write('logout\n')
         await self.writer.protocol.waiter_closed
+        logging.info("telnet communicator closed")
