@@ -6,7 +6,7 @@ from typing import Optional, Literal
 class ConnectionSettings(BaseModel):
     host: str
     port: int
-    username: str
+    username: Optional[str] = None
     password: Optional[str] = None
 
 
@@ -14,7 +14,6 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         cli_parse_args=True, 
         cli_prog_name="tplinkrouter2mqtt",
-        
         )
 
     tplink: ConnectionSettings
