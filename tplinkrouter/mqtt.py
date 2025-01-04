@@ -11,7 +11,7 @@ from .tplink_config import WIFI_ON_CMD, WIFI_OFF_CMD, QSS_ON_CMD, QSS_OFF_CMD
 
 
 @dataclass
-class MQTTCommunicator:
+class TpLinkRouterToMQTTCommunicator:
 
     telnet_communicator: TelnetCommunicator
     client: aiomqtt.Client

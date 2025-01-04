@@ -6,7 +6,7 @@ from typing import Union
 
 import aiomqtt
 
-from tplinkrouter.mqtt import MQTTCommunicator
+from tplinkrouter.mqtt import TpLinkRouterToMQTTCommunicator
 from tplinkrouter.telnet import TelnetCommunicator
 
 logging.basicConfig()
@@ -56,7 +56,7 @@ async def launch():
                 username=args.mqtt_username,
                 password=args.mqtt_password
         )
-    mqtt_communicator = MQTTCommunicator(
+    mqtt_communicator = TpLinkRouterToMQTTCommunicator(
         client=client,
         telnet_communicator=telnet_communicator
     )
