@@ -40,6 +40,7 @@ class TelnetCommunicator:
         logging.debug("execute command: %s", cmd)
         self.writer.write(f'{cmd}\n')
         while True:
+            await asyncio.sleep(1)
             outp = await self.reader.read(1024)
             if 'cmd:SUCC' in outp:
                 self.lock.release()
@@ -74,6 +75,7 @@ class TelnetCommunicator:
     async def authenticate(self):
         while True:
             # read stream until '?' mark is found
+            await asyncio.sleep(1)
             outp = await self.reader.read(1024)
             if not outp:
                 # End of File

@@ -43,6 +43,7 @@ async def launch():
         try:
             logging.info("launching MQTT listening and publishing task")
             async with mqtt_communicator:
+                await mqtt_communicator.send_hass_discovery()
                 await asyncio.gather(
                     mqtt_communicator.publish_state(),
                     mqtt_communicator.listen_to_command(),
